@@ -8,6 +8,7 @@ import (
 type Config struct {
 	DBUrl           string `json:"db_json"`
 	CurrentUserName string `json:"current_user_name"`
+	Connection      string `json:"connection"`
 }
 
 func ReadFile() (*Config, error) {
@@ -42,7 +43,7 @@ func (c *Config) SetUser(userName string) error {
 		return err
 	}
 
-	err = os.WriteFile(homeDir + "/.gatorconfig.json", content, 0644)
+	err = os.WriteFile(homeDir+"/.gatorconfig.json", content, 0644)
 	if err != nil {
 		return err
 	}
