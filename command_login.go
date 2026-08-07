@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 )
@@ -10,7 +12,15 @@ func handlerLogin(s *state, cmd command) error {
 		return errors.New("login command expects 'username' argument")
 	}
 
-	err := s.cfg.SetUser(cmd.args[0])
+	_, err := s.db.GetUser(context.Background(), cmd.args[0])
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return errors.New("user is not registered")
+		}
+		return err
+	}
+
+	err = s.cfg.SetUser(cmd.args[0])
 	if err != nil {
 		return err
 	}

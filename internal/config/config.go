@@ -8,7 +8,6 @@ import (
 type Config struct {
 	DBUrl           string `json:"db_json"`
 	CurrentUserName string `json:"current_user_name"`
-	Connection      string `json:"connection"`
 }
 
 func ReadFile() (*Config, error) {
