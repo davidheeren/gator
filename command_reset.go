@@ -11,7 +11,10 @@ func handlerReset(s *state, cmd command) error {
 		return errors.New("reset command expects 0 arguments")
 	}
 
-	s.db.ResetUsers(context.Background())
+	err := s.db.ResetUsers(context.Background())
+	if err != nil {
+		return err
+	}
 
 	fmt.Println("users table has been reset")
 
