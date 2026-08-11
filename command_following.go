@@ -4,16 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/davidheeren/gator/internal/database"
 )
 
-func handlerFollowing(s *state, cmd command) error {
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 0 {
 		return errors.New("following command expects no arguments")
-	}
-
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
-	if err != nil {
-		return err
 	}
 
 	follows, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
