@@ -30,7 +30,7 @@ func handlerRegister(s *state, cmd command) error {
 	s.cfg.SetUser(createdUser.Name)
 
 	fmt.Println("new user has been registered and logged in")
-	fmt.Println("id:", createdUser.ID)
+	fmt.Println("Id:", createdUser.ID)
 	fmt.Println("CreatedAt:", createdUser.CreatedAt)
 	fmt.Println("UpdatedAt:", createdUser.UpdatedAt)
 	fmt.Println("Name:", createdUser.Name)
