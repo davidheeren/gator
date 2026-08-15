@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 )
 
@@ -16,7 +17,13 @@ func ReadFile() (*Config, error) {
 		return nil, err
 	}
 
-	content, err := os.ReadFile(homeDir + "/.gatorconfig.json")
+	path := homeDir + "/.gatorconfig.json"
+
+	if _, err := os.Stat(path); err != nil {
+		return nil, errors.New("No ~.gatorconfig.json. Please enter the db_json into the config file")
+	}
+
+	content, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
