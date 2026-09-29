@@ -2,11 +2,15 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
+	"github.com/davidheeren/gator/internal/database"
 	"github.com/davidheeren/gator/internal/rss"
+	"github.com/google/uuid"
 )
 
 func handlerAgg(s *state, cmd command) error {
@@ -28,7 +32,6 @@ func handlerAgg(s *state, cmd command) error {
 			return err
 		}
 
-		fmt.Printf("\n----%s----\n\n", feed.Name)
 		_, err = s.db.MarkFeedFetched(context.Background(), feed.ID)
 		if err != nil {
 			return err
@@ -40,7 +43,43 @@ func handlerAgg(s *state, cmd command) error {
 		}
 
 		for _, item := range feedData.Channel.Item {
-			fmt.Println(item.Title)
+			nullDescription := sql.NullString{
+				String: item.Description,
+				Valid:  item.Description != "",
+			}
+
+			// need to handle different date layouts
+			dateLayouts := []string{time.RFC1123Z, time.RFC1123}
+			var nullPubDate sql.NullTime
+			for _, layout := range dateLayouts {
+				pubDate, err := time.Parse(layout, item.PubDate)
+				nullPubDate = sql.NullTime{
+					Time:  pubDate,
+					Valid: err == nil,
+				}
+				if nullPubDate.Valid {
+					break
+				}
+			}
+
+			postArgs := database.CreatePostParams{
+				ID:          uuid.New(),
+				CreatedAt:   time.Now(),
+				UpdatedAt:   time.Now(),
+				Title:       item.Title,
+				Url:         item.Link,
+				Description: nullDescription,
+				PublishedAt: nullPubDate,
+				FeedID:      feed.ID,
+			}
+			_, err := s.db.CreatePost(context.Background(), postArgs)
+			if err != nil {
+				if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+					// fmt.Printf("post %s already exits\n", item.Title)
+				} else {
+					fmt.Printf("Couldn't create post %s: %v", item.Title, err)
+				}
+			}
 		}
 	}
 
